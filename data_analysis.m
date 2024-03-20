@@ -1,3 +1,4 @@
+% Read the data from an Excel file
 data = readtable('data.xlsx', 'Sheet', 'Joint Angles ZXY', 'Range', 'W1:Y10');
 
 % Extract joint angles from the table
@@ -5,9 +6,22 @@ RightShoulderAbduction_Adduction = data.RightShoulderAbduction_Adduction;
 RightShoulderInternal_ExternalRotation = data.RightShoulderInternal_ExternalRotation;
 RightShoulderFlexion_Extension = data.RightShoulderFlexion_Extension;
 
+% Calculate and display statistics for each joint motion
+stats = @(x) [median(x), min(x), max(x)]; % Define an anonymous function for stats
+
+% Display stats for Right Shoulder Abduction/Adduction
+stats_AbdAdd = stats(RightShoulderAbduction_Adduction);
+fprintf('Right Shoulder Abduction/Adduction - Median: %.2f, Min: %.2f, Max: %.2f\n', stats_AbdAdd);
+
+% Display stats for Right Shoulder Internal/External Rotation
+stats_IntExtRot = stats(RightShoulderInternal_ExternalRotation);
+fprintf('Right Shoulder Internal/External Rotation - Median: %.2f, Min: %.2f, Max: %.2f\n', stats_IntExtRot);
+
+% Display stats for Right Shoulder Flexion/Extension
+stats_FlexExt = stats(RightShoulderFlexion_Extension);
+fprintf('Right Shoulder Flexion/Extension - Median: %.2f, Min: %.2f, Max: %.2f\n', stats_FlexExt);
+
 % Define angle ranges for each joint motion
-% For example purposes, ranges are arbitrarily defined as Low, Medium, and High
-% Update these ranges based on your specific requirements
 ranges = struct();
 ranges.Abduction_Adduction = [-90, 0; 0, 90; 90, 180];
 ranges.Internal_ExternalRotation = [-90, -30; -30, 30; 30, 90];
@@ -38,9 +52,9 @@ for i = 1:size(ranges.Flexion_Extension, 1)
 end
 
 % Display the results
-disp('Frames count for Right Shoulder Abduction/Adduction in each range:');
+disp('Frames count for Right Shoulder Abduction/Adduction:');
 disp(counters.Abduction_Adduction);
-disp('Frames count for Right Shoulder Internal/External Rotation in each range:');
+disp('Frames count for Right Shoulder Internal/External Rotation:');
 disp(counters.Internal_ExternalRotation);
-disp('Frames count for Right Shoulder Flexion/Extension in each range:');
+disp('Frames count for Right Shoulder Flexion/Extension:');
 disp(counters.Flexion_Extension);
