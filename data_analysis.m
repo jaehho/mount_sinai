@@ -1,5 +1,5 @@
 % Read the data from an Excel file
-data = readtable('data.xlsx', 'Sheet', 'Joint Angles ZXY', 'Range', 'W1:Y10');
+data = readtable('data.xlsx', 'Sheet', 'Joint Angles ZXY', 'Range', 'W1:Y100');
 
 % Extract joint angles from the table
 RightShoulderAbduction_Adduction = data.RightShoulderAbduction_Adduction;
@@ -21,17 +21,28 @@ fprintf('Right Shoulder Internal/External Rotation - Median: %.2f, Min: %.2f, Ma
 stats_FlexExt = stats(RightShoulderFlexion_Extension);
 fprintf('Right Shoulder Flexion/Extension - Median: %.2f, Min: %.2f, Max: %.2f\n', stats_FlexExt);
 
-% Define angle ranges for each joint motion
-ranges = struct();
-ranges.Abduction_Adduction = [-90, 0; 0, 90; 90, 180];
-ranges.Internal_ExternalRotation = [-90, -30; -30, 30; 30, 90];
-ranges.Flexion_Extension = [0, 45; 45, 90; 90, 180];
-
 % Initialize counters for each range
 counters = struct();
 counters.Abduction_Adduction = zeros(1, 3);
 counters.Internal_ExternalRotation = zeros(1, 3);
 counters.Flexion_Extension = zeros(1, 3);
+
+% Automatically calculate ranges based on min and max
+calculateRanges = @(minVal, maxVal) [minVal, minVal + 1/3 * (maxVal - minVal); minVal + 1/3 * (maxVal - minVal), minVal + 2/3 * (maxVal - minVal); minVal + 2/3 * (maxVal - minVal), maxVal];
+
+% Update ranges based on actual min and max values
+ranges = struct();
+ranges.Abduction_Adduction = calculateRanges(min(RightShoulderAbduction_Adduction), max(RightShoulderAbduction_Adduction));
+ranges.Internal_ExternalRotation = calculateRanges(min(RightShoulderInternal_ExternalRotation), max(RightShoulderInternal_ExternalRotation));
+ranges.Flexion_Extension = calculateRanges(min(RightShoulderFlexion_Extension), max(RightShoulderFlexion_Extension));
+
+% Print the calculated ranges for each joint motion
+printRanges = @(ranges, motionName) fprintf('%s Ranges:\n  Range 1: %.2f to %.2f\n  Range 2: %.2f to %.2f\n  Range 3: %.2f to %.2f\n', motionName, ranges(1,1), ranges(1,2), ranges(2,1), ranges(2,2), ranges(3,1), ranges(3,2));
+
+% Print the ranges for each motion
+printRanges(ranges.Abduction_Adduction, 'Right Shoulder Abduction/Adduction');
+printRanges(ranges.Internal_ExternalRotation, 'Right Shoulder Internal/External Rotation');
+printRanges(ranges.Flexion_Extension, 'Right Shoulder Flexion/Extension');
 
 % Count the frames for Abduction/Adduction
 for i = 1:size(ranges.Abduction_Adduction, 1)
