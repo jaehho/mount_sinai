@@ -1,4 +1,4 @@
-data = readtable(data.xlsx);
+data = readtable('data.xlsx', 'Sheet', 'Joint Angles ZXY', 'Range', 'W1:Y10');
 
 % Extract joint angles from the table
 RightShoulderAbduction_Adduction = data.RightShoulderAbduction_Adduction;
