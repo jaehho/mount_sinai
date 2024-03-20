@@ -9,17 +9,23 @@ RightShoulderFlexion_Extension = data.RightShoulderFlexion_Extension;
 % Calculate and display statistics for each joint motion
 stats = @(x) [median(x), min(x), max(x)]; % Define an anonymous function for stats
 
+% Open a file for writing
+fileID = fopen('analysis_results.txt', 'w');
+
+% Define a custom fprintf to write to both file and Command Window
+custom_fprintf = @(varargin) fprintf(fileID, varargin{:}) & fprintf(varargin{:});
+
 % Display stats for Right Shoulder Abduction/Adduction
 stats_AbdAdd = stats(RightShoulderAbduction_Adduction);
-fprintf('Right Shoulder Abduction/Adduction - Median: %.2f, Min: %.2f, Max: %.2f\n', stats_AbdAdd);
+custom_fprintf('Right Shoulder Abduction/Adduction - Median: %.2f, Min: %.2f, Max: %.2f\n', stats_AbdAdd);
 
 % Display stats for Right Shoulder Internal/External Rotation
 stats_IntExtRot = stats(RightShoulderInternal_ExternalRotation);
-fprintf('Right Shoulder Internal/External Rotation - Median: %.2f, Min: %.2f, Max: %.2f\n', stats_IntExtRot);
+custom_fprintf('Right Shoulder Internal/External Rotation - Median: %.2f, Min: %.2f, Max: %.2f\n', stats_IntExtRot);
 
 % Display stats for Right Shoulder Flexion/Extension
 stats_FlexExt = stats(RightShoulderFlexion_Extension);
-fprintf('Right Shoulder Flexion/Extension - Median: %.2f, Min: %.2f, Max: %.2f\n', stats_FlexExt);
+custom_fprintf('Right Shoulder Flexion/Extension - Median: %.2f, Min: %.2f, Max: %.2f\n', stats_FlexExt);
 
 % Automatically calculate ranges based on min and max
 calculateRanges = @(minVal, maxVal) [minVal, minVal + 1/3 * (maxVal - minVal); minVal + 1/3 * (maxVal - minVal), minVal + 2/3 * (maxVal - minVal); minVal + 2/3 * (maxVal - minVal), maxVal];
@@ -31,7 +37,7 @@ ranges.Internal_ExternalRotation = calculateRanges(min(RightShoulderInternal_Ext
 ranges.Flexion_Extension = calculateRanges(min(RightShoulderFlexion_Extension), max(RightShoulderFlexion_Extension));
 
 % Print the calculated ranges for each joint motion
-printRanges = @(ranges, motionName) fprintf('%s Ranges:\n  Range 1: %.2f to %.2f\n  Range 2: %.2f to %.2f\n  Range 3: %.2f to %.2f\n', motionName, ranges(1,1), ranges(1,2), ranges(2,1), ranges(2,2), ranges(3,1), ranges(3,2));
+printRanges = @(ranges, motionName) custom_fprintf('%s Ranges:\n  Range 1: %.2f to %.2f\n  Range 2: %.2f to %.2f\n  Range 3: %.2f to %.2f\n', motionName, ranges(1,1), ranges(1,2), ranges(2,1), ranges(2,2), ranges(3,1), ranges(3,2));
 
 % Print the ranges for each motion
 printRanges(ranges.Abduction_Adduction, 'Right Shoulder Abduction/Adduction');
@@ -69,6 +75,9 @@ for i = 1:size(ranges.Flexion_Extension, 1)
 end
 
 % Display the results in percentages
-fprintf('\nPercent of frames for Right Shoulder Abduction/Adduction:\n Range 1: %.2f%%\n Range 2: %.2f%%\n Range 3: %.2f%%\n', counters.Abduction_Adduction);
-fprintf('Percent of frames for Right Shoulder Internal/External Rotation:\n Range 1: %.2f%%\n Range 2: %.2f%%\n Range 3: %.2f%%\n', counters.Internal_ExternalRotation);
-fprintf('Percent of frames for Right Shoulder Flexion/Extension:\n Range 1: %.2f%%\n Range 2: %.2f%%\n Range 3: %.2f%%\n', counters.Flexion_Extension);
+custom_fprintf('\nPercent of frames for Right Shoulder Abduction/Adduction:\n Range 1: %.2f%%\n Range 2: %.2f%%\n Range 3: %.2f%%\n', counters.Abduction_Adduction);
+custom_fprintf('Percent of frames for Right Shoulder Internal/External Rotation:\n Range 1: %.2f%%\n Range 2: %.2f%%\n Range 3: %.2f%%\n', counters.Internal_ExternalRotation);
+custom_fprintf('Percent of frames for Right Shoulder Flexion/Extension:\n Range 1: %.2f%%\n Range 2: %.2f%%\n Range 3: %.2f%%\n', counters.Flexion_Extension);
+
+% Close the file
+fclose(fileID);
