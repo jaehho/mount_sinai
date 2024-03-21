@@ -1,18 +1,18 @@
 function data_analysis()
     % Read the data from an Excel file
-    data = readtable('data.xlsx', 'Sheet', 'Joint Angles ZXY', 'Range', 'W1:Y100');
+    data = readtable('data.xlsx', 'Sheet', 'Joint Angles ZXY', 'Range', 'S1:AQ100'); % Adjust range if necessary
 
-    % Define joint motions to analyze
-    jointMotions = {'Abduction_Adduction', 'Internal_ExternalRotation', 'Flexion_Extension'};
-    
+    % Automatically generate joint motions list from table column names
+    jointMotions = data.Properties.VariableNames(2:end); % Assuming the first column is not a joint motion
+
     % Preallocate the results array with zeros
-    % Number of rows equals the number of joint motions, columns equal 7 for each piece of data collected
+    % Adjusted for the new set of joint motions
     results = cell(length(jointMotions), 7); % Using cell array to accommodate mixed data types
 
     % Process each joint motion
     for i = 1:length(jointMotions)
         motionName = jointMotions{i};
-        jointData = data.(['RightShoulder' motionName]);
+        jointData = data.(motionName); % Dynamically extract joint data
 
         % Calculate statistics
         stats = calculateStats(jointData);
@@ -28,10 +28,10 @@ function data_analysis()
     end
 
     % Convert results to table
-    resultsTable = cell2table(results, 'VariableNames', {'Motion', 'Median', 'Min', 'Max', 'PercentFramesRange1', 'PercentFramesRange2', 'PercentFramesRange3'});
+    resultsTable = cell2table(results, 'VariableNames', {'JointMotion', 'Median', 'Min', 'Max', 'PercentFramesRange1', 'PercentFramesRange2', 'PercentFramesRange3'});
     
     % Write table to Excel file
-    writetable(resultsTable, 'analysis_results_table.xlsx');
+    writetable(resultsTable, 'all_joints_analysis_results.xlsx');
 
     % Optionally, display the table in the Command Window
     disp(resultsTable);
