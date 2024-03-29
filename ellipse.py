@@ -60,4 +60,4 @@ def process_motion_data(input_file_name, output_file_name):
     print(f"Processed data written to {output_file_name}")
 
 process_motion_data('jointAngles.csv', 'ellipsedJointAngles.txt')
-process_motion_data('segmentVelocities.csv', 'ellipsedSegmentAngles.txt')
+process_motion_data('segmentVelocities.csv', 'ellipsedSegmentVelocities.txt')
