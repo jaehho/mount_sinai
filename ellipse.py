@@ -1,4 +1,10 @@
 import csv
+import pandas as pd
+
+# jointData = pd.read_excel('data.xlsx', sheet_name='Joint Angles ZXY')
+# jointMotions = jointData.columns[1:]
+# segmentData = pd.read_excel('data.xlsx', sheet_name='Segment Angular Velocity')
+# segmentMotions = segmentData.columns[1:]
 
 def csv_reader(csv_file_path):
     # Open the CSV file
@@ -19,7 +25,7 @@ def find_common_prefix(str1, str2):
         i += 1
     return str1[:i]
 
-def group_values_without_newlines(values):
+def group_values(values):
     grouped_values = []
     current_group = [values[0]]
     last_prefix = values[0]
@@ -42,15 +48,16 @@ def group_values_without_newlines(values):
 
     return "\n".join(grouped_values)
 
-# Input string with values to be grouped
-jointMotions = csv_reader('jointMotions.csv')
+def process_motion_data(input_file_name, output_file_name):
+    motion_data = csv_reader(input_file_name)
 
-# Process the string to group values
-grouped_str_no_newlines = group_values_without_newlines(jointMotions)
-print(grouped_str_no_newlines)
+    grouped_str = group_values(motion_data)
+    
+    # Write the processed data to the output file.
+    with open(output_file_name, 'w', encoding='utf-8') as file:
+        file.writelines(grouped_str)
 
-output_file_path = 'ellipsed.txt'
+    print(f"Processed data written to {output_file_name}")
 
-# Open the file with write ('w') mode
-with open(output_file_path, 'w', encoding='utf-8') as file:
-    file.writelines(grouped_str_no_newlines)
+process_motion_data('jointAngles.csv', 'ellipsedJointMotions.txt')
+process_motion_data('segmentVelocities.csv', 'ellipsedSegmentMotions.txt')
