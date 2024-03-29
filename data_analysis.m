@@ -20,7 +20,7 @@ function data_analysis()
     % segmentVelocities = [];
 
     % Adjusted for the new set of joint motions
-    results = cell(length(jointAngles), 7); % Using cell array to accommodate mixed data types
+    results = cell(length(jointAngles), 8); % Using cell array to accommodate mixed data types
 
     % Process each joint motion
     for i = 1:length(jointAngles)
@@ -31,17 +31,18 @@ function data_analysis()
         stats = calculateStats(jointData);
 
         % Calculate ranges
-        ranges = calculateRanges(jointData);
+        ranges = calculateRanges(jointAngle);
 
         % Calculate frame percentages
         percentFrames = calculateFramePercentages(jointData, ranges);
+        totalpercent = sum(percentFrames);
 
         % Collect results in preallocated array
-        results(i, :) = {jointAngle, stats(1), stats(2), stats(3), percentFrames(1), percentFrames(2), percentFrames(3)};
+        results(i, :) = {jointAngle, stats(1), stats(2), stats(3), percentFrames(1), percentFrames(2), percentFrames(3), totalpercent};
     end
 
     % Convert results to table
-    resultsTable = cell2table(results, 'VariableNames', {'JointMotion', 'Median', 'Min', 'Max', 'PercentFramesRange1', 'PercentFramesRange2', 'PercentFramesRange3'});
+    resultsTable = cell2table(results, 'VariableNames', {'JointMotion', 'Median', 'Min', 'Max', 'PercentFramesRange1', 'PercentFramesRange2', 'PercentFramesRange3', 'percentTotal'});
     
     % Write table to Excel file
     writetable(resultsTable, 'results.xlsx');
@@ -54,11 +55,33 @@ function stats = calculateStats(jointData)
     stats = [median(jointData), min(jointData), max(jointData)];
 end
 
-function ranges = calculateRanges(jointData)
-    minVal = min(jointData);
-    maxVal = max(jointData);
-    step = (maxVal - minVal) / 3;
-    ranges = [minVal, minVal + step; minVal + step, minVal + 2*step; minVal + 2*step, maxVal];
+function ranges = calculateRanges(jointAngle)
+    % Check for joint angle prefixes and assign custom ranges
+    if startsWith(jointAngle, 'C1Head')
+        ranges = [0, 5; 0, 10; 10, 20];
+    elseif startsWith(jointAngle, 'RightShoulder')
+        ranges = [-30, -15; -15, 0; 0, 15];
+    elseif startsWith(jointAngle, 'LeftShoulder')
+        ranges = [-20, -10; -10, 5; 5, 20];
+    elseif startsWith(jointAngle, 'RightElbow')
+        ranges = [-25, -10; -10, 5; 5, 20];
+    elseif startsWith(jointAngle, 'LeftElbow')
+        ranges = [-30, -15; -15, 0; 0, 15];
+    elseif startsWith(jointAngle, 'RightWrist')
+        ranges = [-20, -5; -5, 10; 10, 25];
+    elseif startsWith(jointAngle, 'LeftWrist')
+        ranges = [-15, 0; 0, 15; 15, 30];
+    elseif startsWith(jointAngle, 'RightHip')
+        ranges = [-20, -10; -10, 0; 0, 10];
+    elseif startsWith(jointAngle, 'LeftHip')
+        ranges = [-25, -15; -15, -5; -5, 5];
+    elseif startsWith(jointAngle, 'RightKnee')
+        ranges = [-15, -5; -5, 5; 5, 15];
+    elseif startsWith(jointAngle, 'LeftKnee')
+        ranges = [-10, 0; 0, 10; 10, 20];
+    else
+        error(['Custom ranges for ' jointAngle ' are not defined.']);
+    end
 end
 
 function percentFrames = calculateFramePercentages(jointData, ranges)
