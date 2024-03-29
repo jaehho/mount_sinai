@@ -3,7 +3,11 @@ function data_analysis()
     data = readtable('data.xlsx', 'Sheet', 'Joint Angles ZXY', 'Range', 'S1:AQ100'); % Adjust range if necessary
 
     % Automatically generate joint motions list from table column names
-    jointAngles = (test);
+
+    jointAngles = extractFileText("ellipsedJointAngles.txt");
+    jointAngles = (jointAngles);
+    segmentVelocities = extractFileText("ellipsedSegmentVelocities.txt");
+    segmentVelocities = (segmentVelocities);
 
     % Adjusted for the new set of joint motions
     results = cell(length(jointAngles), 7); % Using cell array to accommodate mixed data types
