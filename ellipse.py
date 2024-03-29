@@ -22,18 +22,21 @@ def find_common_prefix(str1, str2):
 def group_values_without_newlines(values):
     grouped_values = []
     current_group = [values[0]]
-    current_prefix = values[0]
+    last_prefix = values[0]
+    previous_value = ''
 
-    for value in values[1:]:
-        common_prefix = find_common_prefix(current_prefix, value)
-        if value.startswith(common_prefix) and len(common_prefix) > 0:
+    for value in values:
+        common_prefix = find_common_prefix(previous_value, value)
+        
+        if value.startswith(last_prefix):
             current_group.append(value)
-            current_prefix = common_prefix
         else:
             # Join the current group's values, append ellipsis for a new group, and start a new group
             grouped_values.append(",".join(current_group) + "...")
             current_group = [value]
-            current_prefix = value
+
+        last_prefix = common_prefix
+        previous_value = value
     # Add the last group without an ellipsis at the end
     grouped_values.append(",".join(current_group))
 
