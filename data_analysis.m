@@ -1,13 +1,23 @@
 function data_analysis()
     % Read the data from an Excel file
-    data = readtable('data.xlsx', 'Sheet', 'Joint Angles ZXY', 'Range', 'S1:AQ100'); % Adjust range if necessary
+    data = readtable('data.xlsx', 'Sheet', 'Joint Angles ZXY');
 
     % Automatically generate joint motions list from table column names
 
-    jointAngles = extractFileText("ellipsedJointAngles.txt");
-    jointAngles = (jointAngles);
-    segmentVelocities = extractFileText("ellipsedSegmentVelocities.txt");
-    segmentVelocities = (segmentVelocities);
+    jointAngles = {...
+        'C1HeadLateralBending','C1HeadAxialRotation','C1HeadFlexion_Extension',...
+        'RightShoulderAbduction_Adduction','RightShoulderInternal_ExternalRotation','RightShoulderFlexion_Extension',...
+        'RightElbowUlnarDeviation_RadialDeviation','RightElbowPronation_Supination','RightElbowFlexion_Extension',...
+        'RightWristUlnarDeviation_RadialDeviation','RightWristPronation_Supination','RightWristFlexion_Extension',...
+        'LeftShoulderAbduction_Adduction','LeftShoulderInternal_ExternalRotation','LeftShoulderFlexion_Extension',...
+        'LeftElbowUlnarDeviation_RadialDeviation','LeftElbowPronation_Supination','LeftElbowFlexion_Extension',...
+        'LeftWristUlnarDeviation_RadialDeviation','LeftWristPronation_Supination','LeftWristFlexion_Extension',...
+        'RightHipAbduction_Adduction','RightHipInternal_ExternalRotation','RightHipFlexion_Extension',...
+        'RightKneeAbduction_Adduction','RightKneeInternal_ExternalRotation','RightKneeFlexion_Extension',...
+        'LeftHipAbduction_Adduction','LeftHipInternal_ExternalRotation','LeftHipFlexion_Extension',...
+        'LeftKneeAbduction_Adduction','LeftKneeInternal_ExternalRotation','LeftKneeFlexion_Extension',...
+        };
+    % segmentVelocities = [];
 
     % Adjusted for the new set of joint motions
     results = cell(length(jointAngles), 7); % Using cell array to accommodate mixed data types
@@ -15,7 +25,7 @@ function data_analysis()
     % Process each joint motion
     for i = 1:length(jointAngles)
         jointAngle = jointAngles{i};
-        jointData = data.(jointAngle); % Dynamically extract joint data
+        jointData = data.(jointAngle);
 
         % Calculate statistics
         stats = calculateStats(jointData);
@@ -34,7 +44,7 @@ function data_analysis()
     resultsTable = cell2table(results, 'VariableNames', {'JointMotion', 'Median', 'Min', 'Max', 'PercentFramesRange1', 'PercentFramesRange2', 'PercentFramesRange3'});
     
     % Write table to Excel file
-    writetable(resultsTable, 'all_joints_analysis_results.xlsx');
+    writetable(resultsTable, 'results.xlsx');
 
     % Optionally, display the table in the Command Window
     disp(resultsTable);

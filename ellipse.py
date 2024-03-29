@@ -1,6 +1,7 @@
 import csv
 import pandas as pd
 
+# Commented out the original pandas code as it's not directly affected by the change requested.
 # jointData = pd.read_excel('data.xlsx', sheet_name='Joint Angles ZXY')
 # jointMotions = jointData.columns[1:]
 # segmentData = pd.read_excel('data.xlsx', sheet_name='Segment Angular Velocity')
@@ -14,9 +15,9 @@ def csv_reader(csv_file_path):
         
         # Iterate over each row in the CSV file
         for row in csvreader:
-            # 'row' is a list of fields in the current row
-            # You can process each 'row' as needed; here, we simply print it
-            return row
+            # Wrap each value in 'row' with single quotes
+            wrapped_row = [f"'{value}'" for value in row]
+            return wrapped_row
 
 def find_common_prefix(str1, str2):
     """Find the longest common prefix between two strings."""
@@ -38,7 +39,7 @@ def group_values(values):
             current_group.append(value)
         else:
             # Join the current group's values, append ellipsis for a new group, and start a new group
-            grouped_values.append(",".join(current_group) + "...")
+            grouped_values.append(",".join(current_group) + ",...")
             current_group = [value]
 
         last_prefix = common_prefix
