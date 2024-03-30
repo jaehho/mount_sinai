@@ -51,25 +51,23 @@ function data_analysis()
         for j = 1:length(jointAngles{i})
             jointAngle = jointAngles{i}{j};
             jointData = jointAnglesData.(jointAngle);
-            % Generate the key to access the corresponding velocities
             if isKey(jointToSegmentDict, jointAngle)
                 correspondingVelocity = jointToSegmentDict(jointAngle);
-                
                 segmentVelocityData = segmentVelocitiesData.(correspondingVelocity); % Access segment velocity data
-            
+
+                % Diagnostic output (unchanged)
                 fprintf('The segment velocity for %s is %s.\n', jointAngle, correspondingVelocity);
-            
-                % Calculate statistics
+
+                % Analysis calculations (unchanged)
                 stats = calculateStats(jointData);
-            
-                % Calculate ranges
                 ranges = calculateRanges(jointAngle);
-            
-                % Calculate frame percentages and check for 'at rest' condition
                 [percentFrames, atRest] = calculateFramePercentages(jointData, ranges, segmentVelocityData);
-            
-                % Collect results in preallocated array
-                results(j, :) = {jointAngle, stats(1), stats(2), stats(3), percentFrames(1), percentFrames(2), percentFrames(3), atRest, sum(percentFrames)};
+
+                % Collect results using the resultIndex to append correctly
+                results(resultIndex, :) = {jointAngle, stats(1), stats(2), stats(3), percentFrames(1), percentFrames(2), percentFrames(3), atRest, sum(percentFrames)};
+
+                % Increment resultIndex to append the next set of results correctly
+                resultIndex = resultIndex + 1;
             end
         end
     end
