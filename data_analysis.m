@@ -1,62 +1,77 @@
 function data_analysis()
     % Read the data from an Excel file
-    jointAnglesData = readtable('data.xlsx', 'Sheet', 'Joint Angles ZXY');
-    segmentVelocitiesData = readtable('data.xlsx', 'Sheet', 'Segment Angular Velocity');
-%hi
+    jointAnglesData = readtable('test_data.xlsx', 'Sheet', 'Joint Angles ZXY');
+    segmentVelocitiesData = readtable('test_data.xlsx', 'Sheet', 'Segment Angular Velocity');
+
     jointAngles = {...
-        'L5S1LateralBending','L5S1AxialBending','L5S1Flexion_Extension',...
-        'T1C7LateralBending','T1C7AxialRotation','T1C7Flexion_Extension',...
-        'RightShoulderAbduction_Adduction','RightShoulderInternal_ExternalRotation','RightShoulderFlexion_Extension',...
-        'RightElbowUlnarDeviation_RadialDeviation','RightElbowPronation_Supination','RightElbowFlexion_Extension',...
-        'RightWristUlnarDeviation_RadialDeviation','RightWristPronation_Supination','RightWristFlexion_Extension',...
-        'LeftShoulderAbduction_Adduction','LeftShoulderInternal_ExternalRotation','LeftShoulderFlexion_Extension',...
-        'LeftElbowUlnarDeviation_RadialDeviation','LeftElbowPronation_Supination','LeftElbowFlexion_Extension',...
-        'LeftWristUlnarDeviation_RadialDeviation','LeftWristPronation_Supination','LeftWristFlexion_Extension',...
-        'RightKneeAbduction_Adduction','RightKneeInternal_ExternalRotation','RightKneeFlexion_Extension',...
-        'LeftKneeAbduction_Adduction','LeftKneeInternal_ExternalRotation','LeftKneeFlexion_Extension',...
-        };
+        {'L5S1LateralBending', 'L5S1AxialBending', 'L5S1Flexion_Extension'},...
+        {'T1C7LateralBending', 'T1C7AxialRotation', 'T1C7Flexion_Extension'},...
+        {'RightShoulderAbduction_Adduction', 'RightShoulderInternal_ExternalRotation', 'RightShoulderFlexion_Extension'},...
+        {'RightElbowUlnarDeviation_RadialDeviation', 'RightElbowPronation_Supination', 'RightElbowFlexion_Extension'},...
+        {'RightWristUlnarDeviation_RadialDeviation', 'RightWristPronation_Supination', 'RightWristFlexion_Extension'},...
+        {'LeftShoulderAbduction_Adduction', 'LeftShoulderInternal_ExternalRotation', 'LeftShoulderFlexion_Extension'},...
+        {'LeftElbowUlnarDeviation_RadialDeviation', 'LeftElbowPronation_Supination', 'LeftElbowFlexion_Extension'},...
+        {'LeftWristUlnarDeviation_RadialDeviation', 'LeftWristPronation_Supination', 'LeftWristFlexion_Extension'},...
+        {'RightKneeAbduction_Adduction', 'RightKneeInternal_ExternalRotation', 'RightKneeFlexion_Extension'},...
+        {'LeftKneeAbduction_Adduction', 'LeftKneeInternal_ExternalRotation', 'LeftKneeFlexion_Extension'}...
+    };
+    
     segmentVelocities = {...
-        'L5X','L5Y','L5Z',...
-        'NeckX','NeckY','NeckZ',...
-        'RightUpperArmX','RightUpperArmY','RightUpperArmZ',...
-        'RightForearmX','RightForearmY','RightForearmZ',...
-        'RightHandX','RightHandY','RightHandZ',...
-        'LeftUpperArmX','LeftUpperArmY','LeftUpperArmZ',...
-        'LeftForearmX','LeftForearmY','LeftForearmZ',...
-        'LeftHandX','LeftHandY','LeftHandZ',...
-        'RightLowerLegX','RightLowerLegY','RightLowerLegZ',...
-        'LeftLowerLegX','LeftLowerLegY','LeftLowerLegZ',...
-        };
+        {'L5X', 'L5Y', 'L5Z'},...
+        {'NeckX', 'NeckY', 'NeckZ'},...
+        {'RightUpperArmX', 'RightUpperArmY', 'RightUpperArmZ'},...
+        {'RightForearmX', 'RightForearmY', 'RightForearmZ'},...
+        {'RightHandX', 'RightHandY', 'RightHandZ'},...
+        {'LeftUpperArmX', 'LeftUpperArmY', 'LeftUpperArmZ'},...
+        {'LeftForearmX', 'LeftForearmY', 'LeftForearmZ'},...
+        {'LeftHandX', 'LeftHandY', 'LeftHandZ'},...
+        {'RightLowerLegX', 'RightLowerLegY', 'RightLowerLegZ'},...
+        {'LeftLowerLegX', 'LeftLowerLegY', 'LeftLowerLegZ'}...
+    };
 
-    % Ensure the lists are of equal length
-    assert(length(jointAngles) == length(segmentVelocities), 'Joint angles and segment velocities must be paired correctly.');
+    % Create a dictionary to map joint angles to segment velocities
+    jointToSegmentDict = dictionary;
+    
+    % Populate the dictionary with individual mappings
+    for i = 1:length(jointAngles)
+        for j = 1:length(jointAngles{i})
+            key = jointAngles{i}{j}; % Each joint angle is a key
+            value = segmentVelocities{i}{j}; % Corresponding segment velocity is the value
+            jointToSegmentDict(key) = value; % Insert into the dictionary
+        end
+    end
 
-    % Create the mapping
-    jointToSegmentMap = containers.Map(jointAngles, segmentVelocities);
-
+    totalJointAngles = sum(cellfun(@(x) length(x), jointAngles))
     % Adjusted for the new set of joint motions
-    results = cell(length(jointAngles), 9); % Using cell array to accommodate mixed data types
+    results = cell(length(totalJointAngles), 9); % Using cell array to accommodate mixed data types
+    resultIndex = 1;
 
     % Process each joint motion
     for i = 1:length(jointAngles)
-        jointAngle = jointAngles{i};
-        jointData = jointAnglesData.(jointAngle);
-        correspondingVelocity = jointToSegmentMap(jointAngle); % Corrected access
-        segmentVelocityData = segmentVelocitiesData.(correspondingVelocity); % Access segment velocity data
-    
-        fprintf('The segment velocity for %s is %s.\n', jointAngle, correspondingVelocity);
-    
-        % Calculate statistics
-        stats = calculateStats(jointData);
-    
-        % Calculate ranges
-        ranges = calculateRanges(jointAngle);
-    
-        % Calculate frame percentages and check for 'at rest' condition
-        [percentFrames, atRest] = calculateFramePercentages(jointData, ranges, segmentVelocityData);
-    
-        % Collect results in preallocated array
-        results(i, :) = {jointAngle, stats(1), stats(2), stats(3), percentFrames(1), percentFrames(2), percentFrames(3), atRest, sum(percentFrames)};
+        for j = 1:length(jointAngles{i})
+            jointAngle = jointAngles{i}{j};
+            jointData = jointAnglesData.(jointAngle);
+            % Generate the key to access the corresponding velocities
+            if isKey(jointToSegmentDict, jointAngle)
+                correspondingVelocity = jointToSegmentDict(jointAngle);
+                
+                segmentVelocityData = segmentVelocitiesData.(correspondingVelocity); % Access segment velocity data
+            
+                fprintf('The segment velocity for %s is %s.\n', jointAngle, correspondingVelocity);
+            
+                % Calculate statistics
+                stats = calculateStats(jointData);
+            
+                % Calculate ranges
+                ranges = calculateRanges(jointAngle);
+            
+                % Calculate frame percentages and check for 'at rest' condition
+                [percentFrames, atRest] = calculateFramePercentages(jointData, ranges, segmentVelocityData);
+            
+                % Collect results in preallocated array
+                results(j, :) = {jointAngle, stats(1), stats(2), stats(3), percentFrames(1), percentFrames(2), percentFrames(3), atRest, sum(percentFrames)};
+            end
+        end
     end
 
     % Convert results to table
@@ -74,27 +89,18 @@ function stats = calculateStats(jointData)
 end
 
 function ranges = calculateRanges(jointAngle)
-    % Check for joint angle prefixes and assign custom ranges
     if startsWith(jointAngle, 'L5S1')
-        ranges = [0, 5; 0, 10; 10, 20];
+        ranges = [0, 5; 5, 15; 15, 180];
     elseif startsWith(jointAngle, 'T1C7')
-        ranges = [-30, -15; -15, 0; 0, 15];
-    elseif startsWith(jointAngle, 'RightShoulder')
-        ranges = [-30, -15; -15, 0; 0, 15];
-    elseif startsWith(jointAngle, 'LeftShoulder')
-        ranges = [-20, -10; -10, 5; 5, 20];
-    elseif startsWith(jointAngle, 'RightElbow')
-        ranges = [-25, -10; -10, 5; 5, 20];
-    elseif startsWith(jointAngle, 'LeftElbow')
-        ranges = [-30, -15; -15, 0; 0, 15];
-    elseif startsWith(jointAngle, 'RightWrist')
-        ranges = [-20, -5; -5, 10; 10, 25];
-    elseif startsWith(jointAngle, 'LeftWrist')
-        ranges = [-15, 0; 0, 15; 15, 30];
-    elseif startsWith(jointAngle, 'RightKnee')
-        ranges = [-15, -5; -5, 5; 5, 15];
-    elseif startsWith(jointAngle, 'LeftKnee')
-        ranges = [-10, 0; 0, 10; 10, 20];
+        ranges = [0, 5; 5, 5; 5, 180];
+    elseif startsWith(jointAngle, 'RightShoulder') || startsWith(jointAngle, 'LeftShoulder')
+        ranges = [0, 20; 20, 60; 60, 180];
+    elseif startsWith(jointAngle, 'RightElbow') || startsWith(jointAngle, 'LeftElbow')
+        ranges = [180, 160; 160, 90; 90, 0];
+    elseif startsWith(jointAngle, 'RightWrist') || startsWith(jointAngle, 'LeftWrist')
+        ranges = [0, 5; 5, 15; 15, 180];
+    elseif startsWith(jointAngle, 'RightKnee') || startsWith(jointAngle, 'LeftKnee')
+        ranges = [0, 10; 10, 30; 30, 180];
     else
         error(['Custom ranges for ' jointAngle ' are not defined.']);
     end
