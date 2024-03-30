@@ -76,7 +76,7 @@ function data_analysis()
     resultsTable = cell2table(results, 'VariableNames', {'JointMotion', 'Median', 'Min', 'Max', 'Neutral', 'Medium', 'Extreme', 'Rest' 'Percent Total'});
     
     % Write table to Excel file
-    writetable(resultsTable, 'results.xlsx');
+    writetable(resultsTable, 'results.csv');
 
     % Optionally, display the table in the Command Window
     disp(resultsTable);
