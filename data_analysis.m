@@ -1,6 +1,7 @@
 function data_analysis()
     % Read the data from an Excel file
-    data = readtable('data.xlsx', 'Sheet', 'Joint Angles ZXY');
+    jointAnglesData = readtable('data.xlsx', 'Sheet', 'Joint Angles ZXY');
+    segmentVelocitiesData = readtable('data.xlsx', 'Sheet', 'Segment Angular Velocity');
 
     % Automatically generate joint motions list from table column names
 
@@ -43,35 +44,27 @@ function data_analysis()
     % Process each joint motion
     for i = 1:length(jointAngles)
         jointAngle = jointAngles{i};
-        jointData = data.(jointAngle);
-
-        if isKey(jointToSegmentMap, jointAngle)
-            correspondingVelocity = jointToSegmentMap(jointAngle);
-            fprintf('The segment velocity for %s is %s.\n', jointAngle, correspondingVelocity);
-        else
-            fprintf('No segment velocity found for %s.\n', jointAngle);
-        end
-
-        segmentData = data.(correspondingVelocity{i});
-
+        jointData = jointAnglesData.(jointAngle);
+        correspondingVelocity = jointToSegmentMap(jointAngle); % Corrected access
+        segmentVelocityData = segmentVelocitiesData.(correspondingVelocity); % Access segment velocity data
+    
+        fprintf('The segment velocity for %s is %s.\n', jointAngle, correspondingVelocity);
+    
         % Calculate statistics
         stats = calculateStats(jointData);
-
+    
         % Calculate ranges
         ranges = calculateRanges(jointAngle);
-
-        restStatus = checkRestStatus;
-
-        % Calculate frame percentages
-        percentFrames = calculateFramePercentages(jointData, ranges);
-        totalpercent = sum(percentFrames);
-
+    
+        % Calculate frame percentages and check for 'at rest' condition
+        [percentFrames, atRest] = calculateFramePercentages(jointData, ranges, segmentVelocityData);
+    
         % Collect results in preallocated array
-        results(i, :) = {jointAngle, stats(1), stats(2), stats(3), percentFrames(1), percentFrames(2), percentFrames(3), totalpercent, restStatus};
+        results(i, :) = {jointAngle, stats(1), stats(2), stats(3), percentFrames(1), percentFrames(2), percentFrames(3), atRest, sum(percentFrames)};
     end
 
     % Convert results to table
-    resultsTable = cell2table(results, 'VariableNames', {'JointMotion', 'Median', 'Min', 'Max', 'PercentFramesRange1', 'PercentFramesRange2', 'PercentFramesRange3', 'percentTotal'});
+    resultsTable = cell2table(results, 'VariableNames', {'JointMotion', 'Median', 'Min', 'Max', 'PercentFramesRange1', 'PercentFramesRange2', 'PercentFramesRange3', 'rest' 'percentTotal'});
     
     % Write table to Excel file
     writetable(resultsTable, 'results.xlsx');
@@ -113,15 +106,18 @@ function ranges = calculateRanges(jointAngle)
     end
 end
 
-function restStatus = checkRestStatus(velocity)
-    restStatus = velocity < 5;
-end
-
-function percentFrames = calculateFramePercentages(jointData, ranges)
+function [percentFrames, atRest] = calculateFramePercentages(jointData, ranges, velocityData)
     totalFrames = length(jointData);
     percentFrames = zeros(1, size(ranges, 1));
+    atRest = 0; % Initialize atRest as 0, meaning not at rest by default
+
     for i = 1:size(ranges, 1)
         count = sum(jointData >= ranges(i,1) & jointData <= ranges(i,2));
         percentFrames(i) = count / totalFrames * 100;
+        % Check if in the lowest range and at rest
+        if i == 1 && all(velocityData < 5)
+            atRest = percentFrames(i); % Assign the percentage of the first range to atRest if condition is met
+            percentFrames(i) = 0; % Reset the first range percentage as it's considered 'at rest'
+        end
     end
 end
