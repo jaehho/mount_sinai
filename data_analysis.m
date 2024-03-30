@@ -17,15 +17,42 @@ function data_analysis()
         'LeftHipAbduction_Adduction','LeftHipInternal_ExternalRotation','LeftHipFlexion_Extension',...
         'LeftKneeAbduction_Adduction','LeftKneeInternal_ExternalRotation','LeftKneeFlexion_Extension',...
         };
-    % segmentVelocities = [];
+    segmentVelocities = {...
+        'PelvisX','PelvisY','PelvisZ',...
+        'L5X','L5Y','L5Z',...
+        'HeadX','HeadY','HeadZ',...
+        'RightUpperArmX','RightUpperArmY','RightUpperArmZ',...
+        'RightForearmX','RightForearmY','RightForearmZ',...
+        'RightHandX','RightHandY','RightHandZ',...
+        'LeftUpperArmX','LeftUpperArmY','LeftUpperArmZ',...
+        'LeftForearmX','LeftForearmY','LeftForearmZ',...
+        'LeftHandX','LeftHandY','LeftHandZ',...
+        'RightLowerLegX','RightLowerLegY','RightLowerLegZ',...
+        'LeftLowerLegX','LeftLowerLegY','LeftLowerLegZ',...
+    };
+
+    % Ensure the lists are of equal length
+    assert(length(jointAngles) == length(segmentVelocities), 'Joint angles and segment velocities must be paired correctly.');
+
+    % Create the mapping
+    jointToSegmentMap = containers.Map(jointAngles, segmentVelocities);
 
     % Adjusted for the new set of joint motions
-    results = cell(length(jointAngles), 8); % Using cell array to accommodate mixed data types
+    results = cell(length(jointAngles), 9); % Using cell array to accommodate mixed data types
 
     % Process each joint motion
     for i = 1:length(jointAngles)
         jointAngle = jointAngles{i};
         jointData = data.(jointAngle);
+
+        if isKey(jointToSegmentMap, jointAngle)
+            correspondingVelocity = jointToSegmentMap(jointAngle);
+            fprintf('The segment velocity for %s is %s.\n', jointAngle, correspondingVelocity);
+        else
+            fprintf('No segment velocity found for %s.\n', jointAngle);
+        end
+
+        segmentData = data.(correspondingVelocity{i});
 
         % Calculate statistics
         stats = calculateStats(jointData);
@@ -33,12 +60,14 @@ function data_analysis()
         % Calculate ranges
         ranges = calculateRanges(jointAngle);
 
+        restStatus = checkRestStatus;
+
         % Calculate frame percentages
         percentFrames = calculateFramePercentages(jointData, ranges);
         totalpercent = sum(percentFrames);
 
         % Collect results in preallocated array
-        results(i, :) = {jointAngle, stats(1), stats(2), stats(3), percentFrames(1), percentFrames(2), percentFrames(3), totalpercent};
+        results(i, :) = {jointAngle, stats(1), stats(2), stats(3), percentFrames(1), percentFrames(2), percentFrames(3), totalpercent, restStatus};
     end
 
     % Convert results to table
@@ -82,6 +111,10 @@ function ranges = calculateRanges(jointAngle)
     else
         error(['Custom ranges for ' jointAngle ' are not defined.']);
     end
+end
+
+function restStatus = checkRestStatus(velocity)
+    restStatus = velocity < 5;
 end
 
 function percentFrames = calculateFramePercentages(jointData, ranges)
