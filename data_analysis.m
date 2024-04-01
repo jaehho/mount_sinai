@@ -61,33 +61,31 @@ function data_analysis()
             for k = 1:length(jointMotionData) % frame 1-181
                 x = jointData(k, 1); z = jointData(k, 2); y = jointData(k, 3);
                 if startsWith(jointMotion, 'RightShoulder') || startsWith(jointMotion, 'LeftShoulder')
-                [neutral, medium, extreme] = calculateCircleStatus(x, y, z, ranges(1, 2), ranges(2, 2), neutral, medium, extreme);
+                    [neutral, medium, extreme] = calculateCircleStatus(x, y, z, ranges(1, 2), ranges(2, 2), neutral, medium, extreme);
                 end
             end        
 
-            neutralpercent = neutral / 181;
-            mediumpercent = medium / 181;
-            extremepercent = extreme / 181;
+            neutralPercent = neutral / 181;
+            mediumPercent = medium / 181;
+            extremePercent = extreme / 181;
+            totalPercent = neutralPercent + mediumPercent + extremePercent;
 
             if isKey(jointToSegmentDict, jointMotion)
                 correspondingVelocity = jointToSegmentDict(jointMotion);
                 segmentVelocityData = segmentVelocitiesData.(correspondingVelocity); % Access segment velocity data
             end
 
-            % Analysis calculations (unchanged)
             stats = calculateStats(jointMotionData);
-            [percentFrames, atRest] = calculateFramePercentages(jointMotionData, ranges, segmentVelocityData);
 
-            % Collect results using the resultIndex to append correctly
-            results(resultIndex, :) = {jointMotion, stats(1), stats(2), stats(3), percentFrames(1), percentFrames(2), percentFrames(3), atRest, sum(percentFrames)};
+            atRest = 0; % Set atRest to 0 until code for it is implemented
+            results(resultIndex, :) = {jointMotion, stats(1), stats(2), stats(3), neutralPercent, mediumPercent, extremePercent, atRest, totalPercent};
 
-            % Increment resultIndex to append the next set of results correctly
             resultIndex = resultIndex + 1;
         end
-        fprintf('%s Neutral Percentage: %.2f%%\n', joint, neutralpercent * 100);
-        fprintf('%s Medium Percentage: %.2f%%\n', joint, mediumpercent * 100);
-        fprintf('%s Extreme Percentage: %.2f%%\n', joint, extremepercent * 100);
-        fprintf('%s Total Percentage: %.2f%%\n', joint, (neutralpercent + mediumpercent + extremepercent) * 100);
+        fprintf('%s Neutral Percentage: %.2f%%\n', joint, neutralPercent * 100);
+        fprintf('%s Medium Percentage: %.2f%%\n', joint, mediumPercent * 100);
+        fprintf('%s Extreme Percentage: %.2f%%\n', joint, extremePercent * 100);
+        fprintf('%s Total Percentage: %.2f%%\n', joint, totalPercent * 100);
     end
 
     % Convert results to table
@@ -122,22 +120,6 @@ function ranges = calculateRanges(jointMotion)
     end
 end
 
-function [percentFrames, atRest] = calculateFramePercentages(jointMotionData, ranges, velocityData)
-    totalFrames = length(jointMotionData);
-    percentFrames = zeros(1, size(ranges, 1));
-    atRest = 0; % Initialize atRest as 0, meaning not at rest by default
-
-    for i = 1:size(ranges, 1)
-        count = sum(jointMotionData >= ranges(i,1) & jointMotionData <= ranges(i,2));
-        percentFrames(i) = count / totalFrames * 100;
-        % Check if in the lowest range and at rest
-        if i == 1 && all(velocityData < 5)
-            atRest = percentFrames(i); % Assign the percentage of the first range to atRest if condition is met
-            percentFrames(i) = 0; % Reset the first range percentage as it's considered 'at rest'
-        end
-    end
-end
-
 function commonPrefix = findCommonPrefix(strings)
     % Ensure the input is a 1x3 cell array of strings
     if ~iscell(strings) || numel(strings) ~= 3
@@ -157,7 +139,7 @@ function commonPrefix = findCommonPrefix(strings)
 
         % Check if the characters are the same
         if char1 == char2 && char2 == char3
-            commonPrefix = [commonPrefix, char1]; % Append the character to the common prefix
+            commonPrefix = [commonPrefix, char1]; %#ok<AGROW> % Append the character to the common prefix
         else
             break; % Stop if any character differs
         end
