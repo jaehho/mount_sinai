@@ -114,8 +114,12 @@ function ranges = calculateRanges(jointMotion)
         ranges = [0, 20; 20, 60; 60, 180];
     elseif startsWith(jointMotion, 'RightElbow') || startsWith(jointMotion, 'LeftElbow')
         ranges = [180, 160; 160, 90; 90, 0];
-    elseif startsWith(jointMotion, 'RightWrist') || startsWith(jointMotion, 'LeftWrist')
+    elseif startsWith(jointMotion, 'RightWristUlnar') || startsWith(jointMotion, 'LeftWristUlnar')
         ranges = [0, 5; 5, 15; 15, 180];
+    elseif startsWith(jointMotion, 'RightWristFlexion') || startsWith(jointMotion, 'LeftWristFlexion')
+        ranges = [0, 5; 5, 5; 5, 180];
+    elseif startsWith(jointMotion, 'RightWristPronation') || startsWith(jointMotion, 'LeftWristPronation')
+        ranges = [0, 5; 5, 5; 5, 180];
     elseif startsWith(jointMotion, 'RightKnee') || startsWith(jointMotion, 'LeftKnee')
         ranges = [0, 10; 10, 30; 30, 180];
     else
@@ -177,13 +181,13 @@ end
 
 function [neutral, medium, extreme] = calculateEllipseStatus(x, y, z, lowerThreshold, upperThreshold, neutral, medium, extreme)
     if y <= lowerThreshold
-        if (x^2 + z^2) <= lowerThreshold^2
+        if (x^2/(5^2) + z^2/(5^2)) <= 1
             neutral = neutral + 1;
         end
-        if (x^2 + z^2) > lowerThreshold^2 && (x^2 + z^2) <= upperThreshold^2
+        if (x^2/(5^2) + z^2/(5^2)) > 1 && (x^2/(15^2) + z^2/(15^2)) <= 1
             medium = medium + 1;
         end
-        if (x^2 + z^2) > upperThreshold^2
+        if (x^2/(15^2) + z^2/(15^2)) > 1
             extreme = extreme + 1;
         end
     end
