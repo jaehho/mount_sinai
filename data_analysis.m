@@ -41,8 +41,8 @@ function data_analysis()
         end
     end
 
-    totalJointAngles = sum(cellfun(@(x) length(x), joints))
-    frames = height(jointAnglesData.(joints{1}{1}))
+    totalJointAngles = sum(cellfun(@(x) length(x), joints));
+    frames = height(jointAnglesData.(joints{1}{1}));
     results = cell(length(totalJointAngles), 10); % Using cell array to accommodate mixed data types
     resultIndex = 1;
     jointData = zeros(frames, 3); % Initialize joint group data
@@ -57,10 +57,14 @@ function data_analysis()
             ranges = calculateRanges(jointMotion);
             
             neutral = 0; medium = 0; extreme = 0; % Initialize counters for each range
-            for k = 1:length(jointMotionData) % frame 1-frames
+            for k = 1:frames % frame 1-frames
                 x = jointData(k, 1); y = jointData(k, 2); z = jointData(k, 3);
                 if startsWith(jointMotion, 'RightShoulder') || startsWith(jointMotion, 'LeftShoulder')
                     [neutral, medium, extreme] = calculateCircleStatus(x, y, z, ranges(1, 2), ranges(2, 2), neutral, medium, extreme);
+                elseif startsWith(jointMotion, 'RightWrist') || startsWith(jointMotion, 'LeftWrist')
+                    [neutral, medium, extreme] = calculateCircleStatus(x, y, z, ranges(1, 1), ranges(2, 1), neutral, medium, extreme);
+                else
+                    [neutral, medium, extreme] = calculateCircleStatus(x, y, z, ranges(1, 1), ranges(2, 1), neutral, medium, extreme);
                 end
             end        
 
