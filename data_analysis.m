@@ -56,7 +56,7 @@ function data_analysis()
             jointData(:, j) = jointMotionData; % Store joint data for the group (e.g shoulder)
             ranges = calculateRanges(jointMotion);
             
-            neutral = 0; medium = 0; extreme = 0; % Initialize counters for each range
+            neutral = 0; medium = 0; extreme = 0; rest = 0;% Initialize counters for each range
             for k = 1:frames % frame 1-frames
                 x = jointData(k, 1); y = jointData(k, 2); z = jointData(k, 3);
                 if startsWith(jointMotion, 'RightShoulder') || startsWith(jointMotion, 'LeftShoulder')
@@ -71,7 +71,9 @@ function data_analysis()
             neutralPercent = neutral / frames;
             mediumPercent = medium / frames;
             extremePercent = extreme / frames;
-            totalPercent = neutralPercent + mediumPercent + extremePercent;
+            restPercent = rest / frames;
+            
+            totalPercent = neutralPercent + mediumPercent + extremePercent + restPercent;
 
             if isKey(jointToSegmentDict, jointMotion)
                 correspondingVelocity = jointToSegmentDict(jointMotion);
@@ -88,6 +90,7 @@ function data_analysis()
         fprintf('%s Neutral Percentage: %.2f%%\n', joint, neutralPercent * 100);
         fprintf('%s Medium Percentage: %.2f%%\n', joint, mediumPercent * 100);
         fprintf('%s Extreme Percentage: %.2f%%\n', joint, extremePercent * 100);
+        fprintf('%s Rest Percent: %.2f%%\n', joint, restPercent * 100);
         fprintf('%s Total Percentage: %.2f%%\n', joint, totalPercent * 100);
     end
 
@@ -149,10 +152,14 @@ function commonPrefix = findCommonPrefix(strings)
     end
 end
 
-function [neutral, medium, extreme] = calculateCircleStatus(x, y, z, lowerThreshold, upperThreshold, neutral, medium, extreme)
+function [neutral, medium, extreme,rest] = calculateCircleStatus(x, y, z, lowerThreshold, upperThreshold, neutral, medium, extreme,rest)
     if y <= lowerThreshold
         if (x^2 + z^2) <= lowerThreshold^2
-            neutral = neutral + 1;
+            if (segmentVelocityData <= abs(5))
+                rest = rest + 1;
+            else
+                neutral = neutral + 1;
+            end
         end
         if (x^2 + z^2) > lowerThreshold^2 && (x^2 + z^2) <= upperThreshold^2
             medium = medium + 1;
