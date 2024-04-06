@@ -58,7 +58,7 @@ function data_analysis()
             
             neutral = 0; medium = 0; extreme = 0; % Initialize counters for each range
             for k = 1:frames % frame 1-frames
-                x = jointData(k, 1); y = jointData(k, 2); z = jointData(k, 3);
+                x = jointData(k, 1); y = jointData(k, 2); z = jointData(k, 3); % x = abd, y = int, z = flex 
                 if startsWith(jointMotion, 'RightShoulder') || startsWith(jointMotion, 'LeftShoulder')
                     [neutral, medium, extreme] = calculateCircleStatus(x, y, z, ranges(1, 2), ranges(2, 2), neutral, medium, extreme);
                 elseif startsWith(jointMotion, 'RightWrist') || startsWith(jointMotion, 'LeftWrist')
@@ -202,27 +202,11 @@ function [neutral, medium, extreme] = calculateEllipseStatus(x, y, z, lowerThres
 end
 
 function [neutral, medium, extreme] = calculateFlexionStatus(x, y, z, lowerThreshold, upperThreshold, neutral, medium, extreme)
-    if y <= lowerThreshold
-        if (x^2 + z^2) <= lowerThreshold^2
-            neutral = neutral + 1;
-        end
-        if (x^2 + z^2) > lowerThreshold^2 && (x^2 + z^2) <= upperThreshold^2
-            medium = medium + 1;
-        end
-        if (x^2 + z^2) > upperThreshold^2
-            extreme = extreme + 1;
-        end
-    end
-
-    if y > lowerThreshold && y <= upperThreshold
-        if (x^2 + z^2) > lowerThreshold^2 && (x^2 + z^2) <= upperThreshold^2
-            medium = medium + 1;
-        else
-            extreme = extreme + 1;
-        end
-    end
-
-    if y > upperThreshold
+    if z <= lowerThreshold
+        neutral = neutral + 1;
+    elseif z > lowerThreshold && z <= upperThreshold
+        medium = medium + 1;
+    else
         extreme = extreme + 1;
     end
 end
