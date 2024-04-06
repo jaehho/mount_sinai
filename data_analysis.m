@@ -42,11 +42,10 @@ function data_analysis()
     end
 
     totalJointAngles = sum(cellfun(@(x) length(x), joints))
-    % Adjusted for the new set of joint motions
+    frames = height(jointAnglesData.(joints{1}{1}))
     results = cell(length(totalJointAngles), 10); % Using cell array to accommodate mixed data types
     resultIndex = 1;
-    % jointData = zeros(length(joints{1}{1}), 3); % Initialize joint group data
-    jointData = zeros(181, 3); % Initialize joint group data
+    jointData = zeros(frames, 3); % Initialize joint group data
 
     % Process each joint motion
     for i = 1:length(joints) % joints (e.g shoulder) 1-10
@@ -58,16 +57,16 @@ function data_analysis()
             ranges = calculateRanges(jointMotion);
             
             neutral = 0; medium = 0; extreme = 0; % Initialize counters for each range
-            for k = 1:length(jointMotionData) % frame 1-181
+            for k = 1:length(jointMotionData) % frame 1-frames
                 x = jointData(k, 1); y = jointData(k, 2); z = jointData(k, 3);
                 if startsWith(jointMotion, 'RightShoulder') || startsWith(jointMotion, 'LeftShoulder')
                     [neutral, medium, extreme] = calculateCircleStatus(x, y, z, ranges(1, 2), ranges(2, 2), neutral, medium, extreme);
                 end
             end        
 
-            neutralPercent = neutral / 181;
-            mediumPercent = medium / 181;
-            extremePercent = extreme / 181;
+            neutralPercent = neutral / frames;
+            mediumPercent = medium / frames;
+            extremePercent = extreme / frames;
             totalPercent = neutralPercent + mediumPercent + extremePercent;
 
             if isKey(jointToSegmentDict, jointMotion)
