@@ -59,7 +59,7 @@ function data_analysis()
             
             neutral = 0; medium = 0; extreme = 0; % Initialize counters for each range
             for k = 1:length(jointMotionData) % frame 1-181
-                x = jointData(k, 1); z = jointData(k, 2); y = jointData(k, 3);
+                x = jointData(k, 1); y = jointData(k, 2); z = jointData(k, 3);
                 if startsWith(jointMotion, 'RightShoulder') || startsWith(jointMotion, 'LeftShoulder')
                     [neutral, medium, extreme] = calculateCircleStatus(x, y, z, ranges(1, 2), ranges(2, 2), neutral, medium, extreme);
                 end
@@ -147,27 +147,27 @@ function commonPrefix = findCommonPrefix(strings)
 end
 
 function [neutral, medium, extreme] = calculateCircleStatus(x, y, z, lowerThreshold, upperThreshold, neutral, medium, extreme)
-    if z <= lowerThreshold
-        if (x^2 + y^2) <= lowerThreshold^2
+    if y <= lowerThreshold
+        if (x^2 + z^2) <= lowerThreshold^2
             neutral = neutral + 1;
         end
-        if (x^2 + y^2) > lowerThreshold^2 && (x^2 + y^2) <= upperThreshold^2
+        if (x^2 + z^2) > lowerThreshold^2 && (x^2 + z^2) <= upperThreshold^2
             medium = medium + 1;
         end
-        if (x^2 + y^2) > upperThreshold^2
+        if (x^2 + z^2) > upperThreshold^2
             extreme = extreme + 1;
         end
     end
 
-    if z > lowerThreshold && z <= upperThreshold
-        if (x^2 + y^2) > lowerThreshold^2 && (x^2 + y^2) <= upperThreshold^2
+    if y > lowerThreshold && y <= upperThreshold
+        if (x^2 + z^2) > lowerThreshold^2 && (x^2 + z^2) <= upperThreshold^2
             medium = medium + 1;
         else
             extreme = extreme + 1;
         end
     end
 
-    if z > upperThreshold
+    if y > upperThreshold
         extreme = extreme + 1;
     end
 end
