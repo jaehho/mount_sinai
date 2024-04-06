@@ -44,7 +44,6 @@ function data_analysis()
     totalJointAngles = sum(cellfun(@(x) length(x), joints));
     frames = height(jointAnglesData.(joints{1}{1}));
     results = cell(length(totalJointAngles), 10); % Using cell array to accommodate mixed data types
-    resultIndex = 1;
     jointData = zeros(frames, 3); % Initialize joint group data
 
     % Process each joint motion
@@ -81,9 +80,7 @@ function data_analysis()
             stats = calculateStats(jointMotionData);
 
             atRest = 0; % Set atRest to 0 until code for it is implemented
-            results(resultIndex, :) = {jointMotion, stats(1), stats(2), stats(3), stats(4), neutralPercent, mediumPercent, extremePercent, atRest, totalPercent};
-
-            resultIndex = resultIndex + 1;
+            results(i, :) = {jointMotion, stats(1), stats(2), stats(3), stats(4), neutralPercent, mediumPercent, extremePercent, atRest, totalPercent};
         end
         fprintf('%s Neutral Percentage: %.2f%%\n', joint, neutralPercent * 100);
         fprintf('%s Medium Percentage: %.2f%%\n', joint, mediumPercent * 100);
