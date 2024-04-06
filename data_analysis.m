@@ -62,9 +62,9 @@ function data_analysis()
                 if startsWith(jointMotion, 'RightShoulder') || startsWith(jointMotion, 'LeftShoulder')
                     [neutral, medium, extreme] = calculateCircleStatus(x, y, z, ranges(1, 2), ranges(2, 2), neutral, medium, extreme);
                 elseif startsWith(jointMotion, 'RightWrist') || startsWith(jointMotion, 'LeftWrist')
-                    [neutral, medium, extreme] = calculateCircleStatus(x, y, z, ranges(1, 1), ranges(2, 1), neutral, medium, extreme);
+                    [neutral, medium, extreme] = calculateEllipseStatus(x, y, z, ranges(1, 1), ranges(2, 1), neutral, medium, extreme);
                 else
-                    [neutral, medium, extreme] = calculateCircleStatus(x, y, z, ranges(1, 1), ranges(2, 1), neutral, medium, extreme);
+                    [neutral, medium, extreme] = calculateFlexionStatus(x, y, z, ranges(1, 1), ranges(2, 1), neutral, medium, extreme);
                 end
             end        
 
@@ -150,6 +150,58 @@ function commonPrefix = findCommonPrefix(strings)
 end
 
 function [neutral, medium, extreme] = calculateCircleStatus(x, y, z, lowerThreshold, upperThreshold, neutral, medium, extreme)
+    if y <= lowerThreshold
+        if (x^2 + z^2) <= lowerThreshold^2
+            neutral = neutral + 1;
+        end
+        if (x^2 + z^2) > lowerThreshold^2 && (x^2 + z^2) <= upperThreshold^2
+            medium = medium + 1;
+        end
+        if (x^2 + z^2) > upperThreshold^2
+            extreme = extreme + 1;
+        end
+    end
+
+    if y > lowerThreshold && y <= upperThreshold
+        if (x^2 + z^2) > lowerThreshold^2 && (x^2 + z^2) <= upperThreshold^2
+            medium = medium + 1;
+        else
+            extreme = extreme + 1;
+        end
+    end
+
+    if y > upperThreshold
+        extreme = extreme + 1;
+    end
+end
+
+function [neutral, medium, extreme] = calculateEllipseStatus(x, y, z, lowerThreshold, upperThreshold, neutral, medium, extreme)
+    if y <= lowerThreshold
+        if (x^2 + z^2) <= lowerThreshold^2
+            neutral = neutral + 1;
+        end
+        if (x^2 + z^2) > lowerThreshold^2 && (x^2 + z^2) <= upperThreshold^2
+            medium = medium + 1;
+        end
+        if (x^2 + z^2) > upperThreshold^2
+            extreme = extreme + 1;
+        end
+    end
+
+    if y > lowerThreshold && y <= upperThreshold
+        if (x^2 + z^2) > lowerThreshold^2 && (x^2 + z^2) <= upperThreshold^2
+            medium = medium + 1;
+        else
+            extreme = extreme + 1;
+        end
+    end
+
+    if y > upperThreshold
+        extreme = extreme + 1;
+    end
+end
+
+function [neutral, medium, extreme] = calculateFlexionStatus(x, y, z, lowerThreshold, upperThreshold, neutral, medium, extreme)
     if y <= lowerThreshold
         if (x^2 + z^2) <= lowerThreshold^2
             neutral = neutral + 1;
