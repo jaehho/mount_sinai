@@ -41,9 +41,9 @@ function data_analysis()
         end
     end
 
-    totalJointAngles = sum(cellfun(@(x) length(x), joints));
+    totalJointAngles = sum(cellfun(@(x) length(x), joints))
     % Adjusted for the new set of joint motions
-    results = cell(length(totalJointAngles), 9); % Using cell array to accommodate mixed data types
+    results = cell(length(totalJointAngles), 10); % Using cell array to accommodate mixed data types
     resultIndex = 1;
     % jointData = zeros(length(joints{1}{1}), 3); % Initialize joint group data
     jointData = zeros(181, 3); % Initialize joint group data
@@ -78,7 +78,7 @@ function data_analysis()
             stats = calculateStats(jointMotionData);
 
             atRest = 0; % Set atRest to 0 until code for it is implemented
-            results(resultIndex, :) = {jointMotion, stats(1), stats(2), stats(3), neutralPercent, mediumPercent, extremePercent, atRest, totalPercent};
+            results(resultIndex, :) = {jointMotion, stats(1), stats(2), stats(3), stats(4), neutralPercent, mediumPercent, extremePercent, atRest, totalPercent};
 
             resultIndex = resultIndex + 1;
         end
@@ -89,7 +89,7 @@ function data_analysis()
     end
 
     % Convert results to table
-    resultsTable = cell2table(results, 'VariableNames', {'JointMotion', 'Median', 'Min', 'Max', 'Neutral', 'Medium', 'Extreme', 'Rest' 'Percent Total'});
+    resultsTable = cell2table(results, 'VariableNames', {'JointMotion', '50th', '99th', 'Min', 'Max', 'Neutral', 'Medium', 'Extreme', 'Rest' 'Percent Total'});
     
     % Write table to Excel file
     writetable(resultsTable, 'results.csv');
@@ -99,7 +99,7 @@ function data_analysis()
 end
 
 function stats = calculateStats(jointMotionData)
-    stats = [median(jointMotionData), min(jointMotionData), max(jointMotionData)];
+    stats = [median(jointMotionData), prctile(jointMotionData, 99) min(jointMotionData), max(jointMotionData)];
 end
 
 function ranges = calculateRanges(jointMotion)
