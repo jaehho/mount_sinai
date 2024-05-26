@@ -222,10 +222,14 @@ function [neutral, medium, extreme, rest] = calculateCircleStatus(x, y, z, lower
     end
 end
 
-function [neutral, medium, extreme] = calculateEllipseStatus(x, y, z, lowerThreshold, upperThreshold, neutral, medium, extreme, segmentVelocityData)
+function [neutral, medium, extreme] = calculateEllipseStatus(x, y, z, lowerThreshold, upperThreshold, neutral, medium, extreme)
     if y <= lowerThreshold
         if (x^2/(5^2) + z^2/(5^2)) <= 1
-            neutral = neutral + 1;
+            if (abs(segmentVelocityData) <= 5)
+                rest = rest + 1;
+            else
+                neutral = neutral + 1;
+            end
         end
         if (x^2/(5^2) + z^2/(5^2)) > 1 && (x^2/(15^2) + z^2/(15^2)) <= 1
             medium = medium + 1;
@@ -248,28 +252,16 @@ function [neutral, medium, extreme] = calculateEllipseStatus(x, y, z, lowerThres
     end
 end
 
-function [neutral, medium, extreme] = calculateFlexionStatus(x, y, z, lowerThreshold, upperThreshold, neutral, medium, extreme, segmentVelocityData)
-    if y <= lowerThreshold
-        if (x^2 + z^2) <= lowerThreshold^2
+function [neutral, medium, extreme] = calculateFlexionStatus(x, y, z, lowerThreshold, upperThreshold, neutral, medium, extreme)
+    if z <= lowerThreshold
+        if (abs(segmentVelocityData) <= 5)
+            rest = rest + 1;
+        else
             neutral = neutral + 1;
         end
-        if (x^2 + z^2) > lowerThreshold^2 && (x^2 + z^2) <= upperThreshold^2
-            medium = medium + 1;
-        end
-        if (x^2 + z^2) > upperThreshold^2
-            extreme = extreme + 1;
-        end
-    end
-
-    if y > lowerThreshold && y <= upperThreshold
-        if (x^2 + z^2) > lowerThreshold^2 && (x^2 + z^2) <= upperThreshold^2
-            medium = medium + 1;
-        else
-            extreme = extreme + 1;
-        end
-    end
-
-    if y > upperThreshold
+    elseif z > lowerThreshold && z <= upperThreshold
+        medium = medium + 1;
+    else
         extreme = extreme + 1;
     end
 end
