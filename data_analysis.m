@@ -44,7 +44,6 @@ function data_analysis()
     totalJointAngles = sum(cellfun(@(x) length(x), joints));
     frames = height(jointAnglesData.(joints{1}{1}));
     results = cell(length(totalJointAngles), 10); % Using cell array to accommodate mixed data types
-    resultIndex = 1;
     jointData = zeros(frames, 3); % Initialize joint group data
 
     % Process each joint motion
@@ -64,11 +63,13 @@ function data_analysis()
 
             neutral = 0; medium = 0; extreme = 0; rest = 0;% Initialize counters for each range
             for k = 1:frames % frame 1-frames
+            
                 eulerx = jointData(k,1); eulery = jointData(k, 2); eulerz = jointData(k, 3);
                 R = zxy_to_rotation_matrix(eulerz,eulerx,eulery);
                 [abd_add, flex_ext, int_ext] = extract_anatomical_angles(R);
 
                 z = abd_add; x = flex_ext; y = int_ext;
+                
                 if startsWith(jointMotion, 'RightShoulder') || startsWith(jointMotion, 'LeftShoulder')
                     [neutral, medium, extreme, rest] = calculateCircleStatus(x, y, z, ranges(1, 2), ranges(2, 2), neutral, medium, extreme, rest, segmentVelocitiesData.(correspondingVelocity)(k));
                 elseif startsWith(jointMotion, 'RightWrist') || startsWith(jointMotion, 'LeftWrist')
@@ -87,9 +88,11 @@ function data_analysis()
 
             stats = calculateStats(jointMotionData);
 
+
             results(resultIndex, :) = {jointMotion, stats(1), stats(2), stats(3), stats(4), neutralPercent, mediumPercent, extremePercent, restPercent, totalPercent};
 
             resultIndex = resultIndex + 1;
+            
         end
         fprintf('%s Neutral Percentage: %.2f%%\n', joint, neutralPercent * 100);
         fprintf('%s Medium Percentage: %.2f%%\n', joint, mediumPercent * 100);
@@ -150,8 +153,12 @@ function ranges = calculateRanges(jointMotion)
         ranges = [0, 20; 20, 60; 60, 180];
     elseif startsWith(jointMotion, 'RightElbow') || startsWith(jointMotion, 'LeftElbow')
         ranges = [180, 160; 160, 90; 90, 0];
-    elseif startsWith(jointMotion, 'RightWrist') || startsWith(jointMotion, 'LeftWrist')
+    elseif startsWith(jointMotion, 'RightWristUlnar') || startsWith(jointMotion, 'LeftWristUlnar')
         ranges = [0, 5; 5, 15; 15, 180];
+    elseif startsWith(jointMotion, 'RightWristFlexion') || startsWith(jointMotion, 'LeftWristFlexion')
+        ranges = [0, 5; 5, 5; 5, 180];
+    elseif startsWith(jointMotion, 'RightWristPronation') || startsWith(jointMotion, 'LeftWristPronation')
+        ranges = [0, 5; 5, 5; 5, 180];
     elseif startsWith(jointMotion, 'RightKnee') || startsWith(jointMotion, 'LeftKnee')
         ranges = [0, 10; 10, 30; 30, 180];
     else
@@ -217,13 +224,13 @@ end
 
 function [neutral, medium, extreme] = calculateEllipseStatus(x, y, z, lowerThreshold, upperThreshold, neutral, medium, extreme, segmentVelocityData)
     if y <= lowerThreshold
-        if (x^2 + z^2) <= lowerThreshold^2
+        if (x^2/(5^2) + z^2/(5^2)) <= 1
             neutral = neutral + 1;
         end
-        if (x^2 + z^2) > lowerThreshold^2 && (x^2 + z^2) <= upperThreshold^2
+        if (x^2/(5^2) + z^2/(5^2)) > 1 && (x^2/(15^2) + z^2/(15^2)) <= 1
             medium = medium + 1;
         end
-        if (x^2 + z^2) > upperThreshold^2
+        if (x^2/(15^2) + z^2/(15^2)) > 1
             extreme = extreme + 1;
         end
     end
